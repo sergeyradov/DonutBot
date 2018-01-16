@@ -5,10 +5,7 @@ require 'slack-ruby-client'
 # See the "Running the app" section of the README for instructions.
 
 SLACK_CONFIG = {
-  slack_client_id: "296846761172.296978722037",
-  slack_api_secret: "7ed26a3571d9dd28072510032fed8a17",
-  slack_redirect_uri: "https://be210993.ngrok.io/finish_auth",
-  slack_verification_token: "R96jbGQwGtDGYohY4nKC4N7c"
+  # HIDDEN INFO
 }
 
 # Check to see if the required variables listed above were provided, and raise an exception if any are missing.
