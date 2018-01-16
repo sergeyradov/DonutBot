@@ -30,9 +30,6 @@ class API < Sinatra::Base
         # Events have a "type" attribute included in their payload, allowing you to handle different
         # Event payloads as needed.
         case event_data['type']
-          when 'team_join'
-            # Event handler for when a user joins a team
-            Events.user_join(team_id, event_data)
           when 'message'
             # Event handler for messages, including Share Message actions
             Events.send_task(team_id, event_data)
@@ -50,6 +47,12 @@ class API < Sinatra::Base
     request_payload = request.env['rack.request.form_hash']['payload']
     request_data = JSON.parse(request_payload)
     Actions.respond(request_data)
+    status 200
+  end
+
+  post '/tutorial' do
+    request_data = request.env['rack.request.form_hash']
+    Actions.send_tutorial(request_data)
     status 200
   end
 end
@@ -126,45 +129,64 @@ class Actions
     unless data["callback_id"] == "disabled"
 
       team_id = data["team"]["id"]
-
+      
       #SEND OUT RESPONSE MESSAGE
       $teams[team_id]['client'].chat_postMessage(
-      as_user: 'true',
-      channel: data["callback_id"],
-      attachments: [
-        {
-          color: "#3c0783",
-          title: "Task Completed!",
-          text: "<@#{data["user"]["id"]}> has completed your task!",
-          callback_id: "task completed",
-          attachment_type: "default",
-        }
-      ]
+        as_user: 'true',
+        channel: data["callback_id"],
+        attachments: [
+          {
+            color: "#3c0783",
+            title: "Task Completed!",
+            text: "<@#{data["user"]["id"]}> has completed your task!",
+            callback_id: "task completed",
+            attachment_type: "default",
+          }
+        ]
       )
 
       #UPDATE OLD MESSAGE
       $teams[team_id]['client'].chat_update(
-      token: data["token"],
-      channel: data["channel"]["id"],
-      ts: data["original_message"]["ts"],
+        token: data["token"],
+        channel: data["channel"]["id"],
+        ts: data["original_message"]["ts"],
+        attachments: [
+          {
+            color: "#3c0783",
+            title: "Completed Task.",
+            callback_id: "disabled",
+            text: data["original_message"]["attachments"][0]["text"],
+            attachment_type: "default",
+            actions: [
+              {
+                name: "option",
+                value: "completed",
+                text: ":white_check_mark: Completed",
+                type: "button"
+              }
+            ]
+          }
+        ]
+      )
+    end
+  end
+
+  def self.send_tutorial(data)
+    team_id = data["team_id"]
+    channel = $teams[team_id]['client'].im_open(user: data["user_id"])
+
+    $teams[team_id]['client'].chat_postMessage(
+      as_user: 'false',
+      channel: channel.channel.id,
       attachments: [
         {
           color: "#3c0783",
-          title: "Completed Task.",
-          callback_id: "disabled",
-          text: data["original_message"]["attachments"][0]["text"],
+          title: "Tutorial",
+          text: "Welcome to DonutBot! DonutBot is a helper app for assigning tasks to other users.\n\nTo assign a task, simply send a direct message to DonutBot. In the body of the message, tag the user you'd like to assign the task to followed by the task description in plain text.\n\nYou can include as many tasks to as many users as you like, simply add another tag and task after the first.\nExample: '@Will Take out the trash. @Molly Do the dishes.'",
+          callback_id: "tutorial",
           attachment_type: "default",
-          actions: [
-            {
-              name: "option",
-              value: "completed",
-              text: ":white_check_mark: Completed",
-              type: "button"
-            }
-          ]
         }
       ]
-      )
-    end
+    )
   end
 end

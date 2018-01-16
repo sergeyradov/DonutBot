@@ -4,3 +4,5 @@ SLACK_CONFIG = {
   slack_redirect_uri: "https://be210993.ngrok.io/finish_auth",
   slack_verification_token: "R96jbGQwGtDGYohY4nKC4N7c"
 }
+
+SAFEbot.rb
