@@ -4,9 +4,7 @@ require 'slack-ruby-client'
 # Load Slack app info into a hash called `config` from the environment variables assigned during setup
 # See the "Running the app" section of the README for instructions.
 
-SLACK_CONFIG = {
-  # HIDDEN INFO
-}
+
 
 # Check to see if the required variables listed above were provided, and raise an exception if any are missing.
 missing_params = SLACK_CONFIG.select { |key, value| value.nil? }
